@@ -22,16 +22,17 @@ chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
-chrome_options.add_argument('--disable-dev-shm-usage')   
+chrome_options.add_argument('--disable-dev-shm-usage')
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--disable-gpu')
+chrome_options.add_argument('--disable-dev-shm-usage')
 driver = webdriver.Chrome(chrome_options=chrome_options)
 
-
-# driver = webdriver.Chrome(ChromeDriverManager().install(),options=options)
 s3_output_bucket = 'sureter-biodata-bucket'
 
-s3 = boto3.client('s3')
+s3 = boto3.resource('s3',aws_access_key_id=f'{os.getenv("aws_access_key")}',aws_secret_access_key=f'{"aws_access_key"}')
 
-# driver = webdriver.Chrome(chrome_options=options,executable_path=r'D:\Ainee\driver\chromedriver.exe')
 index = 1
 
 
@@ -255,14 +256,7 @@ def main():
         for row in csv_reader:
             tripadvisor_restaurant(row)
 
-
 if __name__ == "__main__":
     main()
-    file_name = 'Restaurant-biodata' + time.strftime("%Y-%m-%d")
-    s3.put_object(Bucket=s3_output_bucket, Key=file_name, Body=file_name)
-
-# download logo
-# web address done
-# halal usher done
-# scrap with price tag
-#  debug hours
+    file_name = 'Restaurant-bio-' + time.strftime("%Y-%m-%d") + '.csv'
+    s3.meta.client.upload_file('./demo.csv', s3_output_bucket,file_name)
