@@ -1,3 +1,4 @@
+
 import time
 
 import re
@@ -16,6 +17,7 @@ from selenium.webdriver import ChromeOptions, ActionChains
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
+from dotenv import load_dotenv
 
 
 chrome_options = webdriver.ChromeOptions()
@@ -29,9 +31,12 @@ chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--disable-dev-shm-usage')
 driver = webdriver.Chrome(chrome_options=chrome_options)
 
-s3_output_bucket = 'sureter-biodata-bucket'
+def configure():
+        load_dotenv()
 
-s3 = boto3.resource('s3',aws_access_key_id=f'{os.getenv("aws_access_key")}',aws_secret_access_key=f'{"aws_access_key"}')
+
+s3_output_bucket = 'sureter-biodata-bucket'
+s3 = boto3.resource('s3',aws_access_key_id=f'{os.getenv("aws_access_key")}',aws_secret_access_key=f'{os.getenv("aws_secret_key")}')
 
 index = 1
 
@@ -87,7 +92,7 @@ def get_price_cuisines_diet(soup2):
             header = r.select_one("div div.tbUiL.b")
             if header is not None:
                 header_text = r.select_one("div div.SrqKb")
-                print(header)
+                #print(header)
                 if header.text == 'PRICE RANGE':
                     output['price'] = header_text.text.replace("\xa0", "")
                 elif header.text == 'CUISINES':
@@ -236,7 +241,7 @@ def tripadvisor_restaurant(row):
         temp['restaurant_url'] = url
         temp['deliveroo_tag'] = get_deliveroo_tag(soup2)
         list_of_dict.append(temp)
-        print('List OF DICT: ', list_of_dict)
+        #print('List OF DICT: ', list_of_dict)
 
         df = pd.DataFrame(list_of_dict)
         if not os.path.isfile('demo.csv'):
@@ -258,5 +263,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-    file_name = 'Restaurant-bio-' + time.strftime("%Y-%m-%d") + '.csv'
+    file_name = 'Restaurant-biodata-' + time.strftime("%Y-%m-%d") + '.csv'
     s3.meta.client.upload_file('./demo.csv', s3_output_bucket,file_name)
